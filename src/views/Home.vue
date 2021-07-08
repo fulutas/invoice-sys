@@ -1,0 +1,220 @@
+<template>
+  <div class="home container">
+    <!-- Header -->
+    <div class="header flex">
+      <div class="left flex flex-column">
+          <h1 class="purple-h1">Faturalar</h1>
+           <span>Toplam {{ filteredData.length }} fatura bulundu.</span>
+      </div>
+      <div class="right flex">
+        <div @click="toggleFilterMenu" class="filter flex" ref="filter">
+          <span>Sipariş Durumu<span class="orange-text" v-if="filteredInvoice"> : {{ filteredInvoice }}</span> </span>
+          <img src="@/assets/icon-arrow-down.svg" alt="">
+          <ul v-show="filterMenu" class="filter-menu">
+            <li @click="filteredInvoices">Taslak</li>
+            <li @click="filteredInvoices">Bekliyor</li>
+            <li @click="filteredInvoices">Ödendi</li>
+            <li @click="filteredInvoices" style="color: red;">Filtreyi Temizle</li>
+          </ul>
+        </div>
+        <div @click="newInvoice" class="button flex">
+            <div class="inner-button flex">
+              <img src="@/assets/icon-plus.svg" alt="">
+            </div>
+            <span>Fatura Oluştur</span>
+        </div>
+      </div>
+    </div>
+    <!-- Invoices -->
+    <div v-if="filteredData.length > 0">
+        <Invoice v-for="(invoice, index) in filteredData" :invoice="invoice" :key="index" />
+    </div>
+    <div v-else class="empty flex flex-column">
+      <img src="@/assets/illustration-empty.svg" alt="">
+      <h3>Henüz bir fatura eklenmedi.</h3>      
+    </div>
+  </div>
+</template>
+
+<script>
+
+import {mapMutations, mapState} from "vuex";
+import Invoice from "../components/Invoice.vue"
+
+export default {
+  name: "Home",
+  data(){
+    return {
+      filterMenu : null,
+      filteredInvoice : null,
+    }
+  },
+  components: {
+    Invoice
+  },
+  methods: {
+
+    ...mapMutations(['TOGGLE_INVOICE']),
+
+    newInvoice(){
+      this.TOGGLE_INVOICE();
+    },
+
+    toggleFilterMenu(){
+      this.filterMenu = !this.filterMenu
+    },
+
+    // filtre seçimi
+    filteredInvoices(e){
+      if(e.target.innerText === 'Filtreyi Temizle'){
+        this.filteredInvoice = null;
+        return;
+      } else {
+        this.filteredInvoice = e.target.innerText;
+      }
+    }
+  },
+
+  computed: {
+    ...mapState(['invoiceData']),
+
+    // filtrelenen faturalar
+    filteredData(){
+      return this.invoiceData.filter(invoice => {
+        if(this.filteredInvoice === "Taslak"){
+          return invoice.invoiceDraft === true;
+        }
+        if(this.filteredInvoice === "Bekliyor"){
+          return invoice.invoicePending === true;
+        }
+        if(this.filteredInvoice === "Ödendi"){
+          return invoice.invoicePaid === true;
+        }
+        // filtre seçimi yok ise tümünü getir.
+        else {
+          return invoice;
+        }            
+      });
+    }
+  }
+};
+</script>
+ 
+ <style lang="scss" scoped>
+ .home {
+   color: #fff;
+
+   .header {
+     margin-bottom: 65px;
+
+     .left,
+     .right {
+       flex:1;
+     }
+
+     .left{
+       span {
+         font-size: 14px;
+       }
+     }
+
+     .right{
+       justify-content: flex-end;
+       align-items: center;
+
+       .button,
+       .filter{
+         align-items: center;
+         
+         span:first-child{
+           font-size: 14px;
+         }
+
+         span:nth-child(2){
+           font-size:13px;
+         }
+       }
+
+       .filter{
+         cursor: pointer;
+         position: relative;
+         margin-right: 40px;
+
+         img{
+           margin-left: 12px;
+           width: 9px;
+           height: 5px;
+         }
+
+         .filter-menu{
+           width: 120px;
+           position: absolute;
+           top:25px;
+           list-style: none;
+           border-radius: 5px;
+           background-color: #1e2139;
+           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+           z-index: 999;
+
+           li{
+             cursor: pointer;
+             font-size: 12px;
+             padding: 10px 20px;
+
+             &:hover{
+               color: #FFF;
+               background-color: #7c5dfa;
+               border-radius: 5px;
+                          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.06);
+             }
+           }
+         }
+       }
+
+       .button{
+         padding: 8px 10px;
+         background-color: #7c5dfa;
+         border-radius: 40px;
+
+         .inner-button{
+           margin-right: 8px;
+           border-radius: 50%;
+           padding: 8px;
+           align-items: center;
+           justify-content: center;
+           background-color: #FFF;
+           
+           img {
+             width: 10px;
+             height: 10px;
+           }
+         }
+       }
+     }
+   }
+
+   .empty {
+     margin-top:160px;
+     align-items:center;
+
+     img {
+       width: 214px;
+       height: 200px;
+     }
+
+     h3 {
+       font-size: 20px;
+       margin-top: 40px;
+     }
+
+     p {
+       text-align: center;
+       max-width: 224px;
+       font-size: 12px;
+       font-weight: 300;
+       margin-top: 16px
+     }
+   }
+
+ }
+ </style>
