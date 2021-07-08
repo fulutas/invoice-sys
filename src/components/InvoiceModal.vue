@@ -290,15 +290,29 @@ export default {
             this.GET_INVOICES();
         }
 
-
-
+    },
+    
+   hasNull(element){
+        return element.itemName == "" || element.qty == "";
     },
 
     async updateInvoice(){
-        if(this.invoiceItemList.length <= 0){
+    
+        if(this.invoiceItemList.some(this.hasNull) || this.invoiceItemList.length <= 0){
             alert("Fatura kalemlerini giriniz.")
             return;
-        } else {
+        }
+
+        // options-1 let checkZeroPrice = this.invoiceItemList.some(data => data.price == 0) 
+        let checkZeroPrice2 = this.invoiceItemList.filter(data => data.price == 0)
+        console.log(checkZeroPrice2)
+
+        if(checkZeroPrice2.length > 0){
+            alert("Sıfır fiyat girilemez!")
+            return;
+        }
+        
+        else {
 
         this.loading = true;    
 
